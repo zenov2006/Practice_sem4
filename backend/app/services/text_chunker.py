@@ -16,6 +16,9 @@ def split_text_into_chunks(
 
     Returns:
         list[str]: Список текстовых чанков.
+
+    Raises:
+        ValueError: Если размер чанка или перекрытие заданы некорректно.
     """
     cleaned_text = " ".join(text.split())
 
@@ -50,11 +53,9 @@ def create_document_chunks(
     document_id: str,
     file_name: str,
     pages_text: list[dict[str, int | str]],
-) -> list[dict[str, int | str | float]]:
+) -> list[dict[str, int | str]]:
     """
     Создаёт список чанков документа с метаданными.
-
-    Эти данные позже будут отправляться в Elasticsearch.
 
     Args:
         document_id: UUID загруженного документа.
@@ -62,9 +63,9 @@ def create_document_chunks(
         pages_text: Список страниц с текстом.
 
     Returns:
-        list[dict[str, int | str | float]]: Список чанков с метаданными.
+        list[dict[str, int | str]]: Список чанков с метаданными.
     """
-    document_chunks: list[dict[str, int | str | float]] = []
+    document_chunks: list[dict[str, int | str]] = []
 
     for page_data in pages_text:
         page_number = int(page_data["page_number"])

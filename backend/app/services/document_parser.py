@@ -52,8 +52,7 @@ def extract_text_from_docx(file_path: Path) -> list[dict[str, int | str]]:
     Извлекает текст из DOCX-документа.
 
     У DOCX нет стабильной информации о страницах, поэтому весь текст
-    временно считается первой страницей. Для поиска это нормально,
-    а номер страницы позже можно заменить на более точную логику.
+    считается первой страницей. Для полнотекстового поиска этого достаточно.
 
     Args:
         file_path: Путь к DOCX-файлу.
@@ -66,18 +65,32 @@ def extract_text_from_docx(file_path: Path) -> list[dict[str, int | str]]:
     """
     try:
         document = Document(file_path)
-        paragraphs = [
-            paragraph.text.strip()
-            for paragraph in document.paragraphs
-            if paragraph.text.strip()
-        ]
+
+        text_parts: list[str] = []
+
+        for paragraph in document.paragraphs:
+            paragraph_text = paragraph.text.strip()
+            if paragraph_text:
+                text_parts.append(paragraph_text)
+
+        for table in document.tables:
+            for row in table.rows:
+                row_cells = [
+                    cell.text.strip()
+                    for cell in row.cells
+                    if cell.text.strip()
+                ]
+
+                if row_cells:
+                    text_parts.append(" | ".join(row_cells))
+
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Не удалось прочитать DOCX-файл",
         ) from exc
 
-    text = "\n".join(paragraphs)
+    text = "\n".join(text_parts)
 
     if not text.strip():
         raise HTTPException(
