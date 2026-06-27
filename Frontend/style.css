@@ -1,0 +1,440 @@
+/* ===== Базовые сбросы и шрифты ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #121a2e;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+    color: #e0e8f0;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ===== Фоновые волны (синие) ===== */
+.background-waves {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.wave {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.35;
+}
+
+.wave1 {
+    top: -10%;
+    animation: waveFloat 20s ease-in-out infinite;
+}
+
+.wave2 {
+    top: -5%;
+    animation: waveFloat 25s ease-in-out infinite reverse;
+    opacity: 0.20;
+}
+
+.wave3 {
+    top: 0%;
+    animation: waveFloat 30s ease-in-out infinite;
+    opacity: 0.10;
+}
+
+@keyframes waveFloat {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    33% { transform: translateX(-30px) translateY(15px); }
+    66% { transform: translateX(30px) translateY(-10px); }
+}
+
+.wave1 path { fill: rgba(59, 130, 246, 0.18); }
+.wave2 path { fill: rgba(99, 102, 241, 0.12); }
+.wave3 path { fill: rgba(59, 130, 246, 0.06); }
+
+/* ===== Контейнер ===== */
+.app {
+    max-width: 1000px;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== Шапка ===== */
+header {
+    text-align: center;
+    margin-bottom: 45px;
+}
+
+header h1 {
+    font-size: 38px;
+    font-weight: 700;
+    background: #fafbfc;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.subtitle {
+    font-size: 16px;
+    font-weight: 300;
+    color: #6a7a9a;
+    margin-top: 10px;
+    -webkit-text-fill-color: #6a7a9a;
+}
+
+/* ===== Зона загрузки ===== */
+.upload-section {
+    margin-bottom: 30px;
+}
+
+.dropzone {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px dashed rgba(96, 165, 250, 0.30);
+    border-radius: 20px;
+    padding: 55px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.dropzone:hover {
+    border-color: rgba(96, 165, 250, 0.60);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.dropzone.dragover {
+    border-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.10);
+    transform: scale(1.01);
+}
+
+.dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.upload-icon {
+    color: #60a5fa;
+    margin-bottom: 8px;
+}
+
+.upload-icon svg {
+    width: 52px;
+    height: 52px;
+    stroke: currentColor;
+}
+
+.dropzone-text {
+    font-size: 17px;
+    font-weight: 400;
+    color: #e0e8f0;
+}
+
+.dropzone-hint {
+    font-size: 13px;
+    color: #5a6a8a;
+    margin-top: 4px;
+}
+
+.dropzone input {
+    display: none;
+}
+
+/* ===== Список файлов ===== */
+.file-list {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.file-item {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 14px 20px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.file-item:hover {
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.file-item .filename {
+    color: #e0e8f0;
+    font-weight: 400;
+}
+
+.file-item .status {
+    font-weight: 500;
+    font-size: 13px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.status.loading {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.12);
+}
+
+.status.done {
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.12);
+}
+
+.status.error {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.12);
+}
+
+/* ===== Поиск ===== */
+.search-section {
+    margin-bottom: 30px;
+}
+
+.search-box {
+    display: flex;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s;
+}
+
+.search-box:focus-within {
+    border-color: rgba(96, 165, 250, 0.40);
+    box-shadow: 0 0 30px rgba(96, 165, 250, 0.06);
+}
+
+.search-input {
+    flex: 1;
+    padding: 14px 20px;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    font-family: inherit;
+    color: #e0e8f0;
+    font-weight: 400;
+}
+
+.search-input::placeholder {
+    color: #5a6a8a;
+}
+
+.search-btn {
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+}
+
+.search-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.30);
+}
+
+.search-btn:active {
+    transform: scale(0.97);
+}
+
+/* ===== Результаты ===== */
+.results {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.result-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 22px 26px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    transition: all 0.3s;
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.result-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.result-card .file-name {
+    font-weight: 600;
+    color: #93bbfc;
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+
+.result-card .file-name::before {
+    content: "📄 ";
+}
+
+.result-card .text {
+    color: #b0c8e0;
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    font-weight: 300;
+}
+
+.result-card .text .highlight {
+    background: rgba(251, 191, 36, 0.20);
+    color: #fbbf24;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.result-card .score {
+    color: #5a6a8a;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+/* ===== Пустые состояния ===== */
+.empty-message {
+    text-align: center;
+    color: #5a6a8a;
+    padding: 50px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+.empty-message strong {
+    color: #93bbfc;
+}
+
+.loading-spinner {
+    text-align: center;
+    color: #93bbfc;
+    padding: 30px;
+    font-size: 15px;
+}
+
+/* ===== Адаптивность ===== */
+@media (max-width: 768px) {
+    body {
+        padding: 20px 14px;
+    }
+
+    header h1 {
+        font-size: 26px;
+    }
+
+    .dropzone {
+        padding: 35px 18px;
+    }
+
+    .dropzone-text {
+        font-size: 15px;
+    }
+
+    .search-box {
+        flex-direction: column;
+        background: transparent;
+        padding: 0;
+        border: none;
+        gap: 10px;
+    }
+
+    .search-input {
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .search-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 14px;
+    }
+
+    .result-card {
+        padding: 16px 18px;
+    }
+
+    .file-item {
+        font-size: 13px;
+        padding: 12px 14px;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .wave {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 20px;
+    }
+
+    .subtitle {
+        font-size: 13px;
+    }
+
+    .dropzone-text {
+        font-size: 13px;
+    }
+
+    .result-card .text {
+        font-size: 13px;
+    }
+}
