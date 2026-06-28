@@ -60,13 +60,16 @@ async def process_uploaded_document(file: UploadFile) -> dict[str, str | int]:
 
         raise
 
+    chunks_count = len(document_chunks)
+
     return {
         "document_id": document_id,
         "file_name": original_file_name,
         "stored_file_name": stored_file_name,
         "file_size": len(file_content),
         "pages_count": len(pages_text),
-        "chunks_count": len(document_chunks),
+        "chunks_count": chunks_count,
+        "chunks": chunks_count,
         "indexed_chunks_count": indexed_chunks_count,
         "status": "indexed",
     }

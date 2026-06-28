@@ -65,7 +65,7 @@ def create_documents_index_if_not_exists() -> None:
         ) from exc
 
 
-def index_document_chunks(chunks: list[dict[str, int | str | float]]) -> int:
+def index_document_chunks(chunks: list[dict[str, int | str]]) -> int:
     """
     Индексирует чанки документа в Elasticsearch.
 
@@ -102,4 +102,65 @@ def index_document_chunks(chunks: list[dict[str, int | str | float]]) -> int:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Ошибка при индексации документа в Elasticsearch",
+        ) from exc
+
+
+def search_document_chunks(
+    query: str,
+    limit: int = 10,
+) -> list[dict[str, str | int | float]]:
+    """
+    Выполняет полнотекстовый поиск по чанкам документов в Elasticsearch.
+
+    Args:
+        query: Поисковый запрос пользователя.
+        limit: Максимальное количество результатов.
+
+    Returns:
+        list[dict[str, str | int | float]]: Список найденных чанков.
+    """
+    client = get_elasticsearch_client()
+
+    try:
+        if not client.indices.exists(index=ELASTICSEARCH_INDEX_NAME):
+            return []
+
+        response = client.search(
+            index=ELASTICSEARCH_INDEX_NAME,
+            query={
+                "multi_match": {
+                    "query": query,
+                    "fields": ["text"],
+                }
+            },
+            size=limit,
+        )
+
+        hits = response["hits"]["hits"]
+        max_score = response["hits"].get("max_score") or 1
+
+        results: list[dict[str, str | int | float]] = []
+
+        for hit in hits:
+            source = hit["_source"]
+            raw_score = hit.get("_score") or 0
+            normalized_score = raw_score / max_score if max_score else 0
+
+            results.append(
+                {
+                    "chunk_id": str(source.get("chunk_id", "")),
+                    "file_name": str(source.get("file_name", "")),
+                    "page": int(source.get("page_number", 0)),
+                    "page_number": int(source.get("page_number", 0)),
+                    "text": str(source.get("text", "")),
+                    "score": round(normalized_score, 2),
+                }
+            )
+
+        return results
+
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка при поиске в Elasticsearch",
         ) from exc

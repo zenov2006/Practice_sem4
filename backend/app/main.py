@@ -3,10 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 
-
 app = FastAPI(
-    title="API для поиска в документах.",
-    description="Backend API для загрузки документов с полнотекстным поиском.",
+    title="Document Search API",
+    description="Backend API для загрузки документов и полнотекстового поиска.",
     version="0.1.0",
 )
 
@@ -18,4 +17,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/api")
