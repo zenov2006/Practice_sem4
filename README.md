@@ -1,6 +1,6 @@
 ```bash
 cp .env.example .env
-
+```
 ```bash
 ELASTICSEARCH_URL=http://elasticsearch:9200
 ELASTICSEARCH_INDEX_NAME=documents
@@ -13,7 +13,7 @@ docker compose up -d --build
 ```bash
 # Проверить статус контейнеров
 docker compose ps
-
+```
 # Проверить Elasticsearch
 curl http://localhost:9200
 
