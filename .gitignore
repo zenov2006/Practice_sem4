@@ -1,5 +1,5 @@
 # =========================
-# Environment variables
+# Environment files
 # =========================
 .env
 .env.local
@@ -32,7 +32,7 @@ dist/
 *.egg
 
 # =========================
-# Pytest / coverage
+# Tests / coverage
 # =========================
 .pytest_cache/
 .coverage
@@ -41,7 +41,8 @@ htmlcov/
 coverage.xml
 
 # =========================
-# FastAPI / local uploaded files
+# Uploaded documents
+# Загруженные пользователем файлы не должны попадать в Git
 # =========================
 backend/app/storage/uploads/*
 !backend/app/storage/uploads/.gitkeep
@@ -66,7 +67,7 @@ Thumbs.db
 desktop.ini
 
 # =========================
-# Node / Frontend
+# Frontend / Node
 # =========================
 node_modules/
 frontend/node_modules/
@@ -84,7 +85,7 @@ pnpm-debug.log*
 docker-data/
 
 # =========================
-# Database local files
+# Local database files
 # =========================
 *.sqlite
 *.sqlite3
