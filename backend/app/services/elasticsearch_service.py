@@ -108,35 +108,67 @@ def index_document_chunks(chunks: list[dict[str, int | str]]) -> int:
 def search_document_chunks(
     query: str,
     limit: int = 10,
-) -> list[dict[str, str | int | float]]:
+    offset: int = 0,
+) -> dict[str, int | list[dict[str, str | int | float]]]:
     """
     Выполняет полнотекстовый поиск по чанкам документов в Elasticsearch.
+
+    Поиск поддерживает параметры limit и offset для пагинации.
 
     Args:
         query: Поисковый запрос пользователя.
         limit: Максимальное количество результатов.
+        offset: Смещение результатов поиска.
 
     Returns:
-        list[dict[str, str | int | float]]: Список найденных чанков.
+        dict[str, int | list[dict[str, str | int | float]]]: Ответ с результатами и общим количеством найденных документов.
     """
     client = get_elasticsearch_client()
 
     try:
         if not client.indices.exists(index=ELASTICSEARCH_INDEX_NAME):
-            return []
+            return {
+                "results_count": 0,
+                "total_count": 0,
+                "results": [],
+            }
 
         response = client.search(
             index=ELASTICSEARCH_INDEX_NAME,
             query={
-                "multi_match": {
-                    "query": query,
-                    "fields": ["text"],
+                "bool": {
+                    "should": [
+                        {
+                            "multi_match": {
+                                "query": query,
+                                "fields": ["text"],
+                                "fuzziness": "AUTO",
+                            }
+                        },
+                        {
+                            "match_phrase_prefix": {
+                                "text": {
+                                    "query": query,
+                                    "max_expansions": 50,
+                                }
+                            }
+                        },
+                    ],
+                    "minimum_should_match": 1,
                 }
             },
             size=limit,
+            from_=offset,
         )
 
         hits = response["hits"]["hits"]
+        total_data = response["hits"]["total"]
+
+        if isinstance(total_data, dict):
+            total_count = int(total_data.get("value", 0))
+        else:
+            total_count = int(total_data)
+
         max_score = response["hits"].get("max_score") or 1
 
         results: list[dict[str, str | int | float]] = []
@@ -157,7 +189,11 @@ def search_document_chunks(
                 }
             )
 
-        return results
+        return {
+            "results_count": len(results),
+            "total_count": total_count,
+            "results": results,
+        }
 
     except Exception as exc:
         raise HTTPException(

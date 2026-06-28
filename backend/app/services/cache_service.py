@@ -20,40 +20,43 @@ def get_redis_client() -> Redis:
     )
 
 
-def build_search_cache_key(query: str, limit: int) -> str:
+def build_search_cache_key(query: str, limit: int, offset: int) -> str:
     """
     Создаёт ключ кеша для поискового запроса.
 
     Args:
         query: Поисковый запрос пользователя.
         limit: Максимальное количество результатов.
+        offset: Смещение результатов поиска.
 
     Returns:
         str: Ключ кеша Redis.
     """
     normalized_query = query.strip().lower()
-    raw_key = f"{normalized_query}:{limit}"
+    raw_key = f"{normalized_query}:{limit}:{offset}"
     hashed_key = sha256(raw_key.encode("utf-8")).hexdigest()
 
     return f"search:{hashed_key}"
 
 
-def get_cached_search_results(
+def get_cached_search_response(
     query: str,
     limit: int,
-) -> list[dict[str, str | int | float]] | None:
+    offset: int,
+) -> dict[str, int | list[dict[str, str | int | float]]] | None:
     """
-    Получает результаты поиска из Redis, если они есть в кеше.
+    Получает ответ поиска из Redis, если он есть в кеше.
 
     Args:
         query: Поисковый запрос пользователя.
         limit: Максимальное количество результатов.
+        offset: Смещение результатов поиска.
 
     Returns:
-        list[dict[str, str | int | float]] | None: Результаты поиска или None.
+        dict[str, int | list[dict[str, str | int | float]]] | None: Ответ поиска или None.
     """
     redis_client = get_redis_client()
-    cache_key = build_search_cache_key(query=query, limit=limit)
+    cache_key = build_search_cache_key(query=query, limit=limit, offset=offset)
 
     try:
         cached_data = redis_client.get(cache_key)
@@ -67,27 +70,29 @@ def get_cached_search_results(
         return None
 
 
-def set_cached_search_results(
+def set_cached_search_response(
     query: str,
     limit: int,
-    results: list[dict[str, str | int | float]],
+    offset: int,
+    search_response: dict[str, int | list[dict[str, str | int | float]]],
 ) -> None:
     """
-    Сохраняет результаты поиска в Redis на ограниченное время.
+    Сохраняет ответ поиска в Redis на ограниченное время.
 
     Args:
         query: Поисковый запрос пользователя.
         limit: Максимальное количество результатов.
-        results: Результаты поиска.
+        offset: Смещение результатов поиска.
+        search_response: Ответ поиска.
     """
     redis_client = get_redis_client()
-    cache_key = build_search_cache_key(query=query, limit=limit)
+    cache_key = build_search_cache_key(query=query, limit=limit, offset=offset)
 
     try:
         redis_client.setex(
             name=cache_key,
             time=SEARCH_CACHE_TTL_SECONDS,
-            value=json.dumps(results, ensure_ascii=False),
+            value=json.dumps(search_response, ensure_ascii=False),
         )
     except RedisError:
         return
