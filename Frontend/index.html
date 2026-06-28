@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Поиск по лекциям университета</title>
+    <link rel="stylesheet" href="../Frontend/style.css" />
+</head>
+<body>
+    <!-- Фоновые волны -->
+    <div class="background-waves">
+        <svg class="wave wave1" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,165.3C960,139,1056,117,1152,122.7C1248,128,1344,160,1392,176L1440,192L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"/>
+        </svg>
+        <svg class="wave wave2" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path d="M0,224L48,208C96,192,192,160,288,170.7C384,181,480,235,576,224C672,213,768,139,864,122.7C960,107,1056,149,1152,160C1248,171,1344,149,1392,138.7L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"/>
+        </svg>
+        <svg class="wave wave3" viewBox="0 0 1440 320" preserveAspectRatio="none">
+            <path d="M0,96L48,112C96,128,192,160,288,181.3C384,203,480,213,576,192C672,171,768,117,864,117.3C960,117,1056,171,1152,181.3C1248,192,1344,160,1392,144L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"/>
+        </svg>
+    </div>
+
+    <div class="app">
+        <header>
+            <h1>Поиск по лекциям университета</h1>
+            <p class="subtitle">Загружайте документы и находите нужную информацию за секунды</p>
+        </header>
+
+        <section class="upload-section">
+            <div id="dropZone" class="dropzone">
+                <div class="dropzone-content">
+                    <div class="upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <p class="dropzone-text">Перетащите файлы сюда или кликните для выбора</p>
+                    <p class="dropzone-hint">Поддерживаются PDF и DOCX, размер до 20 МБ</p>
+                </div>
+                <input type="file" id="fileInput" multiple accept=".pdf,.docx" />
+            </div>
+
+            <div id="fileList" class="file-list"></div>
+        </section>
+
+        <section class="search-section">
+            <div class="search-box">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Введите поисковый запрос..."
+                    class="search-input"
+                />
+                <button id="searchBtn" class="search-btn">Найти</button>
+            </div>
+        </section>
+
+        <section class="results-section">
+            <div id="results" class="results"></div>
+        </section>
+    </div>
+
+    <script src="../Frontend/script.js"></script>
+</body>
+</html>
