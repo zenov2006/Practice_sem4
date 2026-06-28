@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, HTTPException, Query, status
 
 from app.services.cache_service import (
     get_cached_search_response,
@@ -33,16 +33,27 @@ def search_documents(
 
     Returns:
         dict[str, str | int | bool | list[dict[str, str | int | float]]]: Результаты поиска.
+
+    Raises:
+        HTTPException: Если поисковый запрос пустой.
     """
+    query = q.strip()
+
+    if not query:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Поисковый запрос не должен быть пустым",
+        )
+
     cached_response = get_cached_search_response(
-        query=q,
+        query=query,
         limit=limit,
         offset=offset,
     )
 
     if cached_response is not None:
         return {
-            "query": q,
+            "query": query,
             "limit": limit,
             "offset": offset,
             "results_count": int(cached_response["results_count"]),
@@ -52,20 +63,20 @@ def search_documents(
         }
 
     search_response = search_document_chunks(
-        query=q,
+        query=query,
         limit=limit,
         offset=offset,
     )
 
     set_cached_search_response(
-        query=q,
+        query=query,
         limit=limit,
         offset=offset,
         search_response=search_response,
     )
 
     return {
-        "query": q,
+        "query": query,
         "limit": limit,
         "offset": offset,
         "results_count": int(search_response["results_count"]),

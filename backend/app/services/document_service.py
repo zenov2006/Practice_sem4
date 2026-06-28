@@ -1,7 +1,7 @@
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException, UploadFile
+from fastapi import HTTPException, UploadFile, status
 
 from app.core.constants import UPLOAD_DIR
 from app.services.document_parser import extract_text_from_document
@@ -59,6 +59,15 @@ async def process_uploaded_document(file: UploadFile) -> dict[str, str | int]:
             file_path.unlink()
 
         raise
+
+    except Exception as exc:
+        if file_path.exists():
+            file_path.unlink()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Ошибка при обработке документа",
+        ) from exc
 
     chunks_count = len(document_chunks)
 
