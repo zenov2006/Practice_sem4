@@ -1,5 +1,5 @@
 /* ========== Конфигурация API ========== */
-const API_URL = '/api';
+const API_URL = 'http://localhost:8000/api';
 
 /* ========== DOM-элементы ========== */
 const dropZone = document.getElementById('dropZone');
@@ -124,11 +124,16 @@ async function performSearch() {
         }
 
         displayResults(data.results, query);
+        
+        // ===== СОХРАНЯЕМ ИСТОРИЮ НА БЭКЕНДЕ =====
+        saveHistory(query);
+
     } catch {
         resultsDiv.innerHTML = `<div class="empty-message">Ошибка соединения с сервером</div>`;
     }
 }
 
+/* ========== ОТОБРАЖЕНИЕ РЕЗУЛЬТАТОВ (С ИСПРАВЛЕННОЙ ОБРЕЗКОЙ) ========== */
 function displayResults(results, query) {
     if (!results || results.length === 0) {
         resultsDiv.innerHTML = `
@@ -143,19 +148,29 @@ function displayResults(results, query) {
     const words = query.split(/\s+/).filter(w => w.length > 1);
 
     for (const result of results) {
-        let text = result.text || '';
+        // Сначала берём текст
+        let fullText = result.text || '';
         
+        // Обрезаем ДО вставки HTML-тегов, чтобы не сломать разметку
+        let displayText = fullText.substring(0, 500);
+        if (fullText.length > 500) displayText += '...';
+        
+        // Теперь вставляем подсветку в УЖЕ ОБРЕЗАННЫЙ текст
         for (const word of words) {
             const regex = new RegExp(`(${word})`, 'gi');
-            text = text.replace(regex, '<span class="highlight">$1</span>');
+            displayText = displayText.replace(regex, '<span class="highlight">$1</span>');
         }
 
         const scorePercent = Math.round((result.score || 0) * 100);
+        
+        // Номер страницы (если есть, иначе "—")
+        const pageNumber = result.page || '—';
 
         html += `
             <div class="result-card">
                 <div class="file-name">${result.file_name || 'Файл'}</div>
-                <div class="text">${text.substring(0, 500)}${text.length > 500 ? '...' : ''}</div>
+                <div class="page-info">Страница: ${pageNumber}</div>
+                <div class="text">${displayText}</div>
                 <div class="score">Релевантность: ${scorePercent}%</div>
             </div>
         `;
@@ -164,7 +179,106 @@ function displayResults(results, query) {
     resultsDiv.innerHTML = html;
 }
 
-/* ========== Начальное состояние ========== */
+/* ========== ИСТОРИЯ ПОИСКА (С БЭКЕНДОМ) ========== */
+
+async function saveHistory(query) {
+    try {
+        await fetch(`${API_URL}/search/history`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: query }),
+        });
+    } catch (error) {
+        // История не сохранилась — просто молча игнорируем
+        console.warn('Не удалось сохранить историю:', error);
+    }
+}
+
+async function loadHistory() {
+    try {
+        const response = await fetch(`${API_URL}/search/history`);
+        if (response.ok) {
+            const data = await response.json();
+            return data.history || [];
+        }
+    } catch (error) {
+        console.warn('Не удалось загрузить историю:', error);
+    }
+    return [];
+}
+
+// ===== ОТОБРАЖЕНИЕ ИСТОРИИ (ДОБАВЛЯЕМ НА СТРАНИЦУ) =====
+async function renderHistory() {
+    const history = await loadHistory();
+    
+    if (history.length === 0) return;
+    
+    // Создаём блок истории под поиском
+    let historyHtml = `
+        <div class="history-section">
+            <h3>История запросов</h3>
+            <div class="history-list">
+    `;
+    
+    for (const item of history) {
+        historyHtml += `
+            <button class="history-item" data-query="${item.query}">
+                ${item.query}
+                <span class="history-time">${item.timestamp || ''}</span>
+            </button>
+        `;
+    }
+    
+    historyHtml += `
+            </div>
+            <button id="clearHistoryBtn" class="clear-history-btn">Очистить историю</button>
+        </div>
+    `;
+    
+    // Вставляем после поисковой строки (перед результатами)
+    const searchSection = document.querySelector('.search-section');
+    const existingHistory = document.querySelector('.history-section');
+    if (existingHistory) existingHistory.remove();
+    
+    searchSection.insertAdjacentHTML('afterend', historyHtml);
+    
+    // Клик по элементу истории → выполняем поиск
+    document.querySelectorAll('.history-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const query = btn.dataset.query;
+            searchInput.value = query;
+            performSearch();
+        });
+    });
+    
+    // Кнопка очистки истории
+    const clearBtn = document.getElementById('clearHistoryBtn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearHistory);
+    }
+}
+
+async function clearHistory() {
+    try {
+        await fetch(`${API_URL}/search/history`, {
+            method: 'DELETE',
+        });
+        // Удаляем блок истории со страницы
+        const historySection = document.querySelector('.history-section');
+        if (historySection) historySection.remove();
+    } catch (error) {
+        console.warn('Не удалось очистить историю:', error);
+    }
+}
+
+/* ========== ИНИЦИАЛИЗАЦИЯ ========== */
+
+// Загружаем историю при старте
+renderHistory();
+
+// Начальное состояние
 resultsDiv.innerHTML = `
     <div class="empty-message">
         Загрузите документы для начала работы
