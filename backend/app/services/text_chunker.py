@@ -20,11 +20,6 @@ def split_text_into_chunks(
     Raises:
         ValueError: Если размер чанка или перекрытие заданы некорректно.
     """
-    cleaned_text = " ".join(text.split())
-
-    if not cleaned_text:
-        return []
-
     if chunk_size <= 0:
         raise ValueError("Размер чанка должен быть больше нуля")
 
@@ -34,17 +29,25 @@ def split_text_into_chunks(
     if overlap >= chunk_size:
         raise ValueError("Перекрытие должно быть меньше размера чанка")
 
+    cleaned_text = " ".join(text.split())
+
+    if not cleaned_text:
+        return []
+
     chunks: list[str] = []
     start = 0
 
     while start < len(cleaned_text):
         end = start + chunk_size
-        chunk = cleaned_text[start:end]
+        chunk = cleaned_text[start:end].strip()
 
         if chunk:
             chunks.append(chunk)
 
-        start += chunk_size - overlap
+        if end >= len(cleaned_text):
+            break
+
+        start = end - overlap
 
     return chunks
 
@@ -66,6 +69,7 @@ def create_document_chunks(
         list[dict[str, int | str]]: Список чанков с метаданными.
     """
     document_chunks: list[dict[str, int | str]] = []
+    global_chunk_index = 0
 
     for page_data in pages_text:
         page_number = int(page_data["page_number"])
@@ -73,8 +77,8 @@ def create_document_chunks(
 
         text_chunks = split_text_into_chunks(page_text)
 
-        for chunk_index, chunk_text in enumerate(text_chunks, start=1):
-            chunk_id = f"{document_id}_{page_number}_{chunk_index}"
+        for chunk_text in text_chunks:
+            chunk_id = f"{document_id}_{global_chunk_index}"
 
             document_chunks.append(
                 {
@@ -82,9 +86,11 @@ def create_document_chunks(
                     "chunk_id": chunk_id,
                     "file_name": file_name,
                     "page_number": page_number,
-                    "chunk_index": chunk_index,
+                    "chunk_index": global_chunk_index,
                     "text": chunk_text,
                 }
             )
+
+            global_chunk_index += 1
 
     return document_chunks
