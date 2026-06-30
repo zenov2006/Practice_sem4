@@ -35,3 +35,7 @@ docker compose logs elasticsearch --tail=50
 ```bash
 docker compose down
 ```
+## Запуск PostgreSQL
+Проверить, что база данных работает:
+```bash
+docker compose exec postgres psql -U postgres -d practice_db -c "\dt"

@@ -1,5 +1,24 @@
 services:
 
+  postgres:
+    image: postgres:15-alpine
+    container_name: practice-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=practice_db
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d practice_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     container_name: practice-elasticsearch
@@ -44,7 +63,10 @@ services:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - ELASTICSEARCH_INDEX_NAME=documents
       - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+psycopg://postgres:postgres@postgres:5432/practice_db
     depends_on:
+      postgres:
+        condition: service_healthy
       elasticsearch:
         condition: service_healthy
       redis:
@@ -53,7 +75,11 @@ services:
       - app-network
     volumes:
       - ./backend:/app
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
 
   frontend:
     build:
@@ -73,3 +99,4 @@ networks:
 
 volumes:
   es-data:
+  postgres-data:
