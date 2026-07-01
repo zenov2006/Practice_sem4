@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.core.exception_handlers import register_exception_handlers
+from app.core.metrics import PrometheusMiddleware, register_metrics_endpoint
 
 app = FastAPI(
     title="Document Search API",
@@ -11,6 +12,12 @@ app = FastAPI(
 )
 
 register_exception_handlers(app)
+
+# Подключаем middleware для сбора метрик
+app.add_middleware(PrometheusMiddleware)
+
+# Регистрируем эндпоинт /metrics для Prometheus
+register_metrics_endpoint(app)
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,0 +1,68 @@
+{
+  "title": "Backend Monitoring",
+  "uid": "backend-monitoring",
+  "panels": [
+    {
+      "title": "Requests per Second",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(http_requests_total[1m])",
+          "legendFormat": "RPS"
+        }
+      ]
+    },
+    {
+      "title": "Average Response Time",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(http_request_duration_seconds_sum[1m]) / rate(http_request_duration_seconds_count[1m])",
+          "legendFormat": "Avg Response Time"
+        }
+      ]
+    },
+    {
+      "title": "Search Requests",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "http_requests_total{path=\"/api/search\"}",
+          "legendFormat": "Search Requests"
+        }
+      ]
+    },
+    {
+      "title": "Upload Requests",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "http_requests_total{path=\"/api/upload\"}",
+          "legendFormat": "Upload Requests"
+        }
+      ]
+    },
+    {
+      "title": "Error Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(http_requests_total{status_code=~\"5..\"}[1m])",
+          "legendFormat": "5xx Errors"
+        }
+      ]
+    },
+    {
+      "title": "Elasticsearch Status",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "elasticsearch_cluster_health_status{color=\"green\"}",
+          "legendFormat": "ES Health"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 27,
+  "version": 1
+}

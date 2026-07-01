@@ -93,6 +93,45 @@ services:
     networks:
       - app-network
 
+  # ============================================
+  # PROMETHEUS — сбор метрик
+  # ============================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: practice-prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # ============================================
+  # GRAFANA — визуализация метрик
+  # ============================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: practice-grafana
+    volumes:
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    ports:
+      - "3001:3000"
+    networks:
+      - app-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
 networks:
   app-network:
     driver: bridge
@@ -100,3 +139,5 @@ networks:
 volumes:
   es-data:
   postgres-data:
+  prometheus-data:
+  grafana-data:
